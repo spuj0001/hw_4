@@ -1,0 +1,91 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "CO2 Emissions",
+  "width": 800,
+  "height": 500,
+  "params": [
+    {
+      "name": "Year_selection",
+      "value": 2018,
+      "bind": {
+        "input": "range",
+        "min": 1960,
+        "max": 2018,
+        "step": 1,
+        "name": "Year:  "
+      }
+    }
+  ],
+  "projection": {"type": "equirectangular"},
+  "layer": [
+    {
+      "data": {
+        "url":  "world.json",   
+        "format": {"type": "topojson", "feature": "world.geo"}
+      },
+      "transform": [
+        {
+          "calculate": "'Data is not available in ' + datum.properties.name",
+          "as": "note"
+        }
+      ],
+      "mark": {
+        "type": "geoshape",
+        "fill": "#ddd",
+        "stroke": "white",
+        "strokeWidth": 1
+      },
+      "encoding": {"tooltip": {"field": "note"}}
+    },
+    {
+      "data": {
+        "url":  
+"data/CO2 Emissions per capita proper.csv"
+ 
+      },
+      "transform": [
+        {
+          "lookup": "Country Name",
+          "from": {
+            "data": {
+              "url":  
+"world.json",
+ 
+              "format": {
+                "type": "topojson",
+                "feature": "world.geo"
+              }
+            },
+            "key": "properties.name"
+          },
+          "as": "geo"
+        },
+        {"calculate": "datum[Year_selection]", "as": "year_price"}
+      ],
+      "mark": {"type": "geoshape", "stroke": "#fff", "strokeWidth": 0.5},
+      "encoding": {
+        "shape": {"field": "geo", "type": "geojson"},
+        "color": {
+          "field": "year_price",
+          "type": "quantitative",
+          "scale": {
+              "type": "threshold",
+              "domain": [10, 20, 30],
+              "range": ["#fdbe85", "#fd8d3c", "#e6550d", "#a63603"]
+            },
+          "legend": {"format": ".2s"}
+        },
+        "tooltip": [
+          {"field": "Country Name", "type": "nominal", "title": "Country"},
+          {
+            "field": "year_price",
+            "type": "quantitative",
+            "title": "CO2 Emissions per Capita",
+            "format": ","
+          }
+        ]
+      }
+    }
+  ],
+  "config": {}
+}
